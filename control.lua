@@ -83,8 +83,11 @@ script.on_event("squad-spidertron-remote", function(event)
     local player = game.players[event.player_index]
     local stack = {name="squad-spidertron-remote-sel",count=1}
     if player.clean_cursor() and player.cursor_stack.can_set_stack(stack) then
-        player.get_inventory(2).remove("squad-spidertron-remote-sel")
-        player.get_inventory(2).remove("squad-spidertron-remote")
+        if player.get_main_inventory() then
+            player.get_main_inventory().remove("squad-spidertron-remote-sel")
+            player.get_main_inventory().remove("squad-spidertron-remote")
+        end
+
         player.cursor_stack.set_stack(stack)
     end
 end)
