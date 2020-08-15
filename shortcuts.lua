@@ -6,43 +6,70 @@
  * Shortcuts and required items etc for the spider controls
 --]]
 
+require('util')
+
+local shortcut_remote = {
+	type = "shortcut",
+	name = "squad-spidertron-remote",
+	order = "a[squad-spidertron-remote]",
+	action = "create-blueprint-item",
+	localised_name = "Spidertron squad remote",
+	associated_control_input = "squad-spidertron-remote",
+	technology_to_unlock = "spidertron",
+	item_to_create = "squad-spidertron-remote-sel",
+	style = "red",
+	icon =
+	{
+		filename = "__base__/graphics/icons/spidertron.png",
+		priority = "extra-high-no-scale",
+		size = 64,
+		scale = 1,
+		flags = {"icon"}
+	},
+	-- small_icon =
+	-- {
+	-- 	filename = "__Shortcuts__/graphics/artillery-targeting-remote-x24.png",
+	-- 	priority = "extra-high-no-scale",
+	-- 	size = 24,
+	-- 	scale = 1,
+	-- 	flags = {"icon"}
+	-- },
+	-- disabled_small_icon =
+	-- {
+	-- 	filename = "__Shortcuts__/graphics/artillery-targeting-remote-x24-white.png",
+	-- 	priority = "extra-high-no-scale",
+	-- 	size = 24,
+	-- 	scale = 1,
+	-- 	flags = {"icon"}
+	-- },
+}
+
+local shortcut_follow = util.table.deepcopy(shortcut_remote)
+shortcut_follow.name = "squad-spidertron-follow"
+shortcut_follow.action = "lua"
+shortcut_follow.localised_name = "Follow player"
+shortcut_follow.associated_control_input = "squad-spidertron-follow"
+shortcut_follow.style = "blue"
+shortcut_follow.toggleable = true
+
+local input_remote = {
+	type = "custom-input",
+	name = "squad-spidertron-remote",
+	localised_name = "Spidertron squad remote",
+	key_sequence = "ALT + X",
+	consuming = "none"
+}
+
+local input_follow = util.table.deepcopy(input_remote)
+input_follow.name = "squad-spidertron-follow"
+input_follow.localised_name = "Follow player"
+input_follow.key_sequence = "ALT + C"
+
 data:extend(
 {
-	{
-		type = "shortcut",
-		name = "squad-spidertron-remote",
-		order = "a[squad-spidertron-remote]",
-		action = "create-blueprint-item",
-		localised_name = "Spidertron squad remote",
-		associated_control_input = "squad-spidertron-remote",
-		technology_to_unlock = "spidertron",
-		item_to_create = "squad-spidertron-remote-sel",
-		style = "red",
-		icon =
-		{
-			filename = "__base__/graphics/icons/spidertron.png",
-			priority = "extra-high-no-scale",
-			size = 64,
-			scale = 1,
-			flags = {"icon"}
-		},
-		-- small_icon =
-		-- {
-		-- 	filename = "__Shortcuts__/graphics/artillery-targeting-remote-x24.png",
-		-- 	priority = "extra-high-no-scale",
-		-- 	size = 24,
-		-- 	scale = 1,
-		-- 	flags = {"icon"}
-		-- },
-		-- disabled_small_icon =
-		-- {
-		-- 	filename = "__Shortcuts__/graphics/artillery-targeting-remote-x24-white.png",
-		-- 	priority = "extra-high-no-scale",
-		-- 	size = 24,
-		-- 	scale = 1,
-		-- 	flags = {"icon"}
-		-- },
-	},
+	shortcut_remote,
+	shortcut_follow,
+
 	{
 		type = "selection-tool",
 		name = "squad-spidertron-remote-sel",
@@ -82,11 +109,7 @@ data:extend(
 		order = "b[personal-transport]-c[spidertron]-b[remote]",
 		stack_size = 1
 	},
-	{
-		type = "custom-input",
-		name = "squad-spidertron-remote",
-		localised_name = "Spidertron squad remote",
-		key_sequence = "ALT + X",
-		consuming = "game-only"
-	}
+
+	input_remote,
+	input_follow
 })
