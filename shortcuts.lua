@@ -65,6 +65,11 @@ input_follow.name = "squad-spidertron-follow"
 input_follow.localised_name = "Follow player"
 input_follow.key_sequence = "ALT + C"
 
+local input_switch_modes = util.table.deepcopy(input_remote)
+input_switch_modes.name = "squad-spidertron-switch-modes"
+input_switch_modes.localised_name = "Switch modes (between selecting and commanding)"
+input_switch_modes.key_sequence = "mouse-button-2"
+
 data:extend(
 {
 	shortcut_remote,
@@ -111,5 +116,6 @@ data:extend(
 	},
 
 	input_remote,
-	input_follow
+	input_follow,
+	input_switch_modes
 })

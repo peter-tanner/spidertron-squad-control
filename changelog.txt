@@ -15,3 +15,13 @@ Version: 0.2.0
 Date: 2020-08-15
   Features:
     - Adds follow mode for your squad to follow you either on foot or in a vehicle
+
+---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: 2020-08-16
+  Features:
+    - Squads stay aligned, based on original formation when selected
+    - RMB now switches between commanding and selecting mode
+  Bugfixes:
+    - Fixed "wobble" or "dance" when in follow mode while in a spidertron that is in the squad that is being asked to follow
+    - Fixed squad drifting
