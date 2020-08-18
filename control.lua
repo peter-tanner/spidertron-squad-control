@@ -6,10 +6,11 @@
  * Spiderbot.
 --]]
 
+-- /c for i=0,5 do game.player.insert("spidertron"); end; for i=0,2 do game.player.insert("spidertron-remote") end
 require("util")
 
 local function give_tool(player, stack)
-    if player.clean_cursor() and player.cursor_stack.can_set_stack(stack) then
+    if player.clean_cursor() and player.cursor_stack and player.cursor_stack.can_set_stack(stack) then
         if player.get_main_inventory() then
             player.get_main_inventory().remove("squad-spidertron-remote-sel")
             player.get_main_inventory().remove("squad-spidertron-remote")
@@ -24,9 +25,8 @@ local function squad_center(spidersquad)
     local ybar=0
     local c=0
     for i=1, #spidersquad do
-        local spider = spidersquad[i]
         c=c+1
-        local pos = spider.position
+        local pos = spidersquad[i].position
         xbar=xbar+pos.x
         ybar=ybar+pos.y
     end
@@ -58,15 +58,14 @@ local function validate_spiders(index)
     local c=0
     if global.spidercontrol_spidersquad[index] then
         --for i, spider_ in pairs(global.spidercontrol_spidersquad[index].spiders) do
-        local d = global.spidercontrol_spidersquad[index].spiders
-        for i=1, #d do
-            if not d[i].spider_entity.valid then
-                table.remove(global.spidercontrol_spidersquad[index].spiders,i)
+        for i, spider in pairs(global.spidercontrol_spidersquad[index].spiders) do
+            if not spider.spider_entity or not spider.spider_entity.valid then
+                global.spidercontrol_spidersquad[index].spiders[i] = nil
                 c=c+1
             end
         end
         if c > 0 then
-            game.players[index].print(c .. " units were destroyed or mined since the last position command was sent")
+            game.players[index].print(c .. " units were destroyed or mined since the last position command was sent")   --this is causing crashes for one user. states that the player does not exist (why?) needs more research
         end
         return true
     end
@@ -79,7 +78,7 @@ local function spiderbot_designate(index, position)
         local leader = d_.spider_leader
         local l_d = {0,0}
         if leader then
-            if spidersquad[leader].spider_entity.valid then
+            if spidersquad[leader] and spidersquad[leader].spider_entity.valid then
                 -- game.players[index].print("Leader "..leader)
                 l_d = spidersquad[leader].d
             else
@@ -91,9 +90,8 @@ local function spiderbot_designate(index, position)
 
 
         local follow = game.players[index].is_shortcut_toggled("squad-spidertron-follow")
-        for i=1, #spidersquad do
+        for i, spider_ in pairs(spidersquad) do
             if i ~= leader or not follow then
-                local spider_ = spidersquad[i]
                 local spider = spider_.spider_entity
                 local d = spider_.d
                 spider.autopilot_destination = {position.x+d[1]-l_d[1], position.y+d[2]-l_d[2]} -- leader dy and dx offsets so that the leader itself becomes the new mean of the squad.
@@ -115,8 +113,12 @@ local function spiderbot_follow(player)
 end
 
 local function initialize()
-	if global.spidercontrol_spidersquad == nil then
-		global.spidercontrol_spidersquad = {}
+    if global.spidercontrol_spidersquad == nil then
+        game.print("Create tables for spidertron control mod")
+        global.spidercontrol_spidersquad = {}
+        for _, player in pairs(game.players) do
+            global.spidercontrol_spidersquad[player.index] = {spider_leader = nil, spiders={}}
+        end
 	end
 end
 
@@ -131,48 +133,50 @@ script.on_event(defines.events.on_player_used_spider_remote, function(event)
     local index = event.player_index
     local player = game.players[index]
     local cursor_stack = player.cursor_stack
-    if cursor_stack.valid_for_read and cursor_stack.name == "squad-spidertron-remote" and event.success then
-        player.set_shortcut_toggled("squad-spidertron-follow", false)
-        spiderbot_designate(index, event.position)
-    elseif cursor_stack.valid_for_read and cursor_stack.name == "spidertron-remote" and event.success then -- WARNING: We're only overriding for the player's spidertron if it's the vanilla spidertron remote. Does not cover modded remotes!
-        -- Alter dy and dx
-        local unit_no = event.vehicle.unit_number
-        local d_ = global.spidercontrol_spidersquad[index]
-        local spidersquad = d_.spiders
-        local leader = d_.spider_leader
+    if cursor_stack then    -- how can a player use a remote without a cursor_stack though???
+        if  cursor_stack.valid_for_read and cursor_stack.name == "squad-spidertron-remote" and event.success then
+            player.set_shortcut_toggled("squad-spidertron-follow", false)
+            spiderbot_designate(index, event.position)
+        elseif cursor_stack.valid_for_read and cursor_stack.name == "spidertron-remote" and event.success then -- WARNING: We're only overriding for the player's spidertron if it's the vanilla spidertron remote. Does not cover modded remotes!
+            -- Alter dy and dx
+            local unit_no = event.vehicle.unit_number
+            local d_ = global.spidercontrol_spidersquad[index]
+            local spidersquad = d_.spiders
+            local leader = d_.spider_leader
 
-        if spidersquad then -- HELLO: if you are reading this and have an idea how to optimize it pls let me know (Not really critical as it's not in the tick loop, but could be problematic for very large squads )
-            for i=1, #spidersquad do  --something something premature debugging evil, but seriously the amount of loops are worrying (for large squds).
-                if i ~= leader and spidersquad[i].spider_entity.unit_number == unit_no then -- Don't alter dy and dx for the squad leader (leads to infinite walking)
-                    local dest = event.position
-                    local flat = {} -- repack the array (which is divided because of us storing dy and dx) into a flat one
-                    for j=1, #spidersquad do 
-                        if j == i then
-                            flat[#flat+1] = {position = dest}   -- need to predict where it will be and use that as a mean, not current location
-                        else
-                            flat[#flat+1] = spidersquad[j].spider_entity
+            if spidersquad then -- HELLO: if you are reading this and have an idea how to optimize it pls let me know (Not really critical as it's not in the tick loop, but could be problematic for very large squads )
+                for i, spider in pairs(spidersquad) do  --something something premature debugging evil, but seriously the amount of loops are worrying (for large squds).
+                    if i ~= leader and spider.spider_entity.unit_number == unit_no then -- Don't alter dy and dx for the squad leader (leads to infinite walking)
+                        local dest = event.position
+                        local flat = {} -- repack the array (which is divided because of us storing dy and dx) into a flat one
+                        for j, spider_ in pairs(spidersquad) do 
+                            if j == i then
+                                flat[#flat+1] = {position = dest}   -- need to predict where it will be and use that as a mean, not current location
+                            else
+                                flat[#flat+1] = spider_.spider_entity
+                            end
                         end
-                    end
-                    local center = squad_center(flat)
-                    -- tried to do something without calling this loop but it's the most reliable option
+                        local center = squad_center(flat)
+                        -- tried to do something without calling this loop but it's the most reliable option
 
-                    --very interesting problem : because the mean of the squad is dependent on the positions of each squad member, varying the dy/dx parameters of only one spider (originally the one we're moving) results in this one being scaled off the 'actual' target location - at very far distances from the squad mean this becomes very noticeable. This means we need to calculate the mean of the entire squad if one has changed position. I noticed this error because of the fact that the offset was not constant but proportional to distance away from the mean
-                    for k=1, #spidersquad do
-                        if k == i then
-                            global.spidercontrol_spidersquad[index].spiders[k].d = {
-                                dest.x - center[1], --dx
-                                dest.y - center[2]  --dy
-                            }
-                        else
-                            local pos = spidersquad[k].spider_entity.position
-                            global.spidercontrol_spidersquad[index].spiders[k].d = {
-                                pos.x - center[1], --dx
-                                pos.y - center[2]  --dy
-                            }
+                        --very interesting problem : because the mean of the squad is dependent on the positions of each squad member, varying the dy/dx parameters of only one spider (originally the one we're moving) results in this one being scaled off the 'actual' target location - at very far distances from the squad mean this becomes very noticeable. This means we need to calculate the mean of the entire squad if one has changed position. I noticed this error because of the fact that the offset was not constant but proportional to distance away from the mean
+                        for k, spider_ in pairs(spidersquad) do 
+                            if k == i then
+                                global.spidercontrol_spidersquad[index].spiders[k].d = {
+                                    dest.x - center[1], --dx
+                                    dest.y - center[2]  --dy
+                                }
+                            else
+                                local pos = spider_.spider_entity.position
+                                global.spidercontrol_spidersquad[index].spiders[k].d = {
+                                    pos.x - center[1], --dx
+                                    pos.y - center[2]  --dy
+                                }
+                            end
                         end
+                        -- game.print("dx"..dest.x - center[1].."dy"..dest.y - center[2])
+                        break
                     end
-                    -- game.print("dx"..dest.x - center[1].."dy"..dest.y - center[2])
-                    break
                 end
             end
         end
@@ -185,9 +189,9 @@ local function squad_leader_state(index)
         local unit_no = player.vehicle.unit_number
         local d = global.spidercontrol_spidersquad[index].spiders
         if d then
-            for i=1, #d do
-                -- game.print(d[i].spider_entity.unit_number)
-                if d[i].spider_entity.unit_number == unit_no then
+            for i, spider in pairs(d) do
+                -- game.print(spider.spider_entity.unit_number)
+                if spider.spider_entity.valid and spider.spider_entity.unit_number == unit_no then
                     global.spidercontrol_spidersquad[index].spider_leader = i
                     break
                 end
@@ -199,6 +203,10 @@ local function squad_leader_state(index)
 end
 
 script.on_event(defines.events.on_player_driving_changed_state, function (event)
+    squad_leader_state(event.player_index)
+end)
+
+script.on_event(defines.events.on_player_died, function(event)
     squad_leader_state(event.player_index)
 end)
 
@@ -226,12 +234,12 @@ end)
 script.on_event("squad-spidertron-switch-modes", function(event)
     local player = game.players[event.player_index]
     local cursor_stack = player.cursor_stack
-    if cursor_stack.valid_for_read then
+    if cursor_stack and cursor_stack.valid_for_read then
         if cursor_stack.name == "squad-spidertron-remote" then
             give_tool(player, {name="squad-spidertron-remote-sel",count=1})
         elseif cursor_stack.name == "squad-spidertron-remote-sel" then
             local e = global.spidercontrol_spidersquad[event.player_index]
-            if e.spiders and e.spiders[1].spider_entity.valid and give_tool(player, {name="squad-spidertron-remote",count=1}) then
+            if e.spiders[1] and e.spiders[1].spider_entity.valid and give_tool(player, {name="squad-spidertron-remote",count=1}) then
                 player.cursor_stack.connected_entity=e.spiders[1].spider_entity
             end
         end
@@ -283,7 +291,7 @@ local update_interval = settings.global["spidertron-follow-update-interval"].val
 
 script.on_nth_tick(update_interval, function(event)
     for _, player in pairs(game.players) do
-        if player.is_shortcut_toggled("squad-spidertron-follow") then
+        if player.is_shortcut_toggled("squad-spidertron-follow") and player.controller_type ~= 0 then -- 0 => defines.character.ghost (DEAD)
             local index = player.index
             if global.spidercontrol_spidersquad[index].spiders[1] then
                 local p_pos = player.position
