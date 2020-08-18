@@ -25,3 +25,11 @@ Date: 2020-08-16
   Bugfixes:
     - Fixed "wobble" or "dance" when in follow mode while in a spidertron that is in the squad that is being asked to follow
     - Fixed squad drifting
+
+---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 2020-08-17
+  Features:
+    - If the player is inisde a spidertron while in follow mode, they will not move to the 'mean' of the squad
+    - Regular remotes can be used on spidertrons to relocate their position in the squad
+    - Regular remotes can be used on a spidertron with a player inside of it to move it and the squad to a position
