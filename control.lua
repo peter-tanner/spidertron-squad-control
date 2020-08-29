@@ -9,6 +9,7 @@
 -- /c for i=0,5 do game.player.insert("spidertron"); end; for i=0,2 do game.player.insert("spidertron-remote") end
 require("util")
 
+
 local function give_tool(player, stack)
     if player.clean_cursor() and player.cursor_stack and player.cursor_stack.can_set_stack(stack) then
         if player.get_main_inventory() then
@@ -112,6 +113,17 @@ local function spiderbot_follow(player)
 	end
 end
 
+local function spidertron_waypoints_compatability()
+    -- Compatability for Spidertron Waypoints
+    if remote.interfaces["SpidertronWaypoints"] then
+        local event_ids = remote.call("SpidertronWaypoints", "get_event_ids")
+        local on_spidertron_given_new_destination = event_ids.on_spidertron_given_new_destination
+        SPIDERTRON_WAYPOINTS = true
+        script.on_event(on_spidertron_given_new_destination, function(event) game.print("New destination") spiderbot_designate(event.player_index, event.position) end)
+    end
+end
+
+
 local function initialize()
     if global.spidercontrol_spidersquad == nil then
         game.print("Create tables for spidertron control mod")
@@ -119,11 +131,13 @@ local function initialize()
         for _, player in pairs(game.players) do
             global.spidercontrol_spidersquad[player.index] = {spider_leader = nil, spiders={}}
         end
-	end
+    end
+    spidertron_waypoints_compatability()
 end
 
 script.on_init(initialize)
 script.on_configuration_changed(initialize)
+script.on_load(function() spidertron_waypoints_compatability() end)
 --commands.add_command("spiderbot_initialize_variables", "debug: ensure that all global tables are not nil (should not happen in a normal game)", initialize)
 
 script.on_event(defines.events.on_player_alt_selected_area, spiderbot_select)
@@ -134,11 +148,13 @@ script.on_event(defines.events.on_player_used_spider_remote, function(event)
     local player = game.players[index]
     local cursor_stack = player.cursor_stack
     if cursor_stack then    -- how can a player use a remote without a cursor_stack though???
-        if  cursor_stack.valid_for_read and cursor_stack.name == "squad-spidertron-remote" and event.success then
+        if cursor_stack.valid_for_read and cursor_stack.name == "squad-spidertron-remote" and event.success then
+            game.print("squad-spidertron-remote")
             player.set_shortcut_toggled("squad-spidertron-follow", false)
-            spiderbot_designate(index, event.position)
+            if not SPIDERTRON_WAYPOINTS then spiderbot_designate(index, event.position) end
         elseif cursor_stack.valid_for_read and cursor_stack.name == "spidertron-remote" and event.success then -- WARNING: We're only overriding for the player's spidertron if it's the vanilla spidertron remote. Does not cover modded remotes!
             -- Alter dy and dx
+            game.print("spidertron-remote")
             local unit_no = event.vehicle.unit_number
             local d_ = global.spidercontrol_spidersquad[index]
             local spidersquad = d_.spiders
