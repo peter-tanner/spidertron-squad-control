@@ -184,6 +184,24 @@ local function spiderbot_follow(player)
 	end
 end
 
+local function handle_new_autopilot_destination(event)
+    -- Called from both on_player_used_spider_remote and (SpidertronWaypoints') on_spidertron_given_new_destination
+    if event.remote == "squad-spidertron-remote" then
+        spiderbot_designate(event.player_index, event.position)
+    end
+end
+
+
+local function spidertron_waypoints_compatability()
+    -- Compatability for Spidertron Waypoints
+    if remote.interfaces["SpidertronWaypoints"] then
+        local event_ids = remote.call("SpidertronWaypoints", "get_event_ids")
+        on_spidertron_given_new_destination = event_ids.on_spidertron_given_new_destination
+        SPIDERTRON_WAYPOINTS = true
+        script.on_event(on_spidertron_given_new_destination, handle_new_autopilot_destination)
+    end
+end
+
 local function initialize()
     if global.spidercontrol_spidersquad == nil then
         game.print("Create tables for spidertron control mod")
@@ -192,7 +210,8 @@ local function initialize()
         for _, player in pairs(game.players) do
             global.spidercontrol_spidersquad[player.index] = {spider_leader = nil, spiders={}}
         end
-	end
+    end
+    spidertron_waypoints_compatability()
 end
 
 local function squad_leader_state(index)
@@ -230,52 +249,10 @@ script.on_event(defines.events.on_player_used_spider_remote, function(event)
     if cursor_stack then    -- how can a player use a remote without a cursor_stack though???
         if cursor_stack.valid_for_read and event.success then
             local cname = cursor_stack.name
-            if cname == "squad-spidertron-remote" then
+            if cname == "squad-spidertron-remote" and not game.active_mods["SpidertronWaypoints"] then
                 player.set_shortcut_toggled("squad-spidertron-follow", false)
-                spiderbot_designate(index, event.position)
-            elseif cname == "spidertron-remote" then -- WARNING: We're only overriding for the player's spidertron if it's the vanilla spidertron remote. Does not cover modded remotes!
-                -- Alter dy and dx
-                local unit_no = event.vehicle.unit_number
-                local d_ = global.spidercontrol_spidersquad[index]  -- Note : Decided against doing checks on a linked squad because it would involve checking that table which can be massively large (larger than player table)
-                if validate_spiders(d_, index) then
-                    local spidersquad = d_.spiders
-                    local leader = d_.spider_leader
-
-                 -- HELLO: if you are reading this and have an idea how to optimize it pls let me know (Not really critical as it's not in the tick loop, but could be problematic for very large squads )
-                    for i, spider in pairs(spidersquad) do  --something something premature debugging evil, but seriously the amount of loops are worrying (for large squds).
-                        if i ~= leader and spider.spider_entity.unit_number == unit_no then -- Don't alter dy and dx for the squad leader (leads to infinite walking)
-                            local dest = event.position
-                            local flat = {} -- repack the array (which is divided because of us storing dy and dx) into a flat one
-                            for j, spider_ in pairs(spidersquad) do 
-                                if j == i then
-                                    flat[#flat+1] = {position = dest}   -- need to predict where it will be and use that as a mean, not current location
-                                else
-                                    flat[#flat+1] = spider_.spider_entity
-                                end
-                            end
-                            local center = squad_center(flat)
-                            -- tried to do something without calling this loop but it's the most reliable option
-
-                            --very interesting problem : because the mean of the squad is dependent on the positions of each squad member, varying the dy/dx parameters of only one spider (originally the one we're moving) results in this one being scaled off the 'actual' target location - at very far distances from the squad mean this becomes very noticeable. This means we need to calculate the mean of the entire squad if one has changed position. I noticed this error because of the fact that the offset was not constant but proportional to distance away from the mean
-                            for k, spider_ in pairs(spidersquad) do 
-                                if k == i then
-                                    global.spidercontrol_spidersquad[index].spiders[k].d = {
-                                        dest.x - center[1], --dx
-                                        dest.y - center[2]  --dy
-                                    }
-                                else
-                                    local pos = spider_.spider_entity.position
-                                    global.spidercontrol_spidersquad[index].spiders[k].d = {
-                                        pos.x - center[1], --dx
-                                        pos.y - center[2]  --dy
-                                    }
-                                end
-                            end
-                            -- game.print("dx"..dest.x - center[1].."dy"..dest.y - center[2])
-                            break
-                        end
-                    end
-                end
+                event["remote"] = cname
+                spiderbot_designate(event)
             elseif cname == "squad-spidertron-link-tool" then
                 if player.selected and player.selected.valid then
                     local selected = player.selected

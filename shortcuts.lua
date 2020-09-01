@@ -44,7 +44,7 @@ local item_remote = {
 	type = "spidertron-remote",
 	name = "squad-spidertron-remote",
 	localised_name = "Spidertron squad remote",
-	icon = "__base__/graphics/icons/spidertron-remote.png",
+	icons = {{icon = "__base__/graphics/icons/spidertron-remote.png", tint = {r = 1}}},
 	icon_color_indicator_mask = "__base__/graphics/icons/spidertron-remote-mask.png",
 	icon_size = 64, icon_mipmaps = 4,
 	subgroup = "other",
