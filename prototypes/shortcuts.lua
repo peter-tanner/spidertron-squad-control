@@ -8,6 +8,10 @@
 
 require('util')
 
+------------------------------------------------------------------------
+-- ITEMS
+------------------------------------------------------------------------
+
 local item_remote_sel = {
 	type = "selection-tool",
 	name = "squad-spidertron-remote-sel",
@@ -59,15 +63,19 @@ item_link.localised_name = "Spidertron link tool"
 item_link.icon = "__Spider_Control__/graphics/icons/spidertron-link-tool.png"
 item_link.icon_color_indicator_mask = "__Spider_Control__/graphics/icons/spidertron-link-tool-mask.png"
 
+------------------------------------------------------------------------
+-- SHORTCUTS
+------------------------------------------------------------------------
+
 local shortcut_remote = {
 	type = "shortcut",
 	name = "squad-spidertron-remote",
 	order = "a[squad-spidertron-remote]",
-	action = "create-blueprint-item",
+	action = "spawn-item",
 	localised_name = "Spidertron squad remote",
 	associated_control_input = "squad-spidertron-remote",
 	technology_to_unlock = "spidertron",
-	item_to_create = "squad-spidertron-remote-sel",
+	item_to_spawn = "squad-spidertron-remote-sel",
 	style = "red",
 	icon =
 	{
@@ -110,6 +118,10 @@ shortcut_link.localised_name = "Link spidertrons to entity"
 shortcut_link.associated_control_input = "squad-spidertron-link-tool"
 shortcut_link.style = "green"
 
+------------------------------------------------------------------------
+-- CUSTOM INPUT
+------------------------------------------------------------------------
+
 local input_remote = {
 	type = "custom-input",
 	name = "squad-spidertron-remote",
@@ -132,6 +144,10 @@ local input_link = util.table.deepcopy(input_remote)
 input_link.name = "squad-spidertron-link-tool"
 input_link.localised_name = "Link spidertron squad to entity"
 input_link.key_sequence = "ALT + Z"
+
+------------------------------------------------------------------------
+-- EXTEND
+------------------------------------------------------------------------
 
 data:extend(
 {

@@ -6,4 +6,4 @@
  * Data
 --]]
 
-require("shortcuts")
+require("prototypes.shortcuts")
