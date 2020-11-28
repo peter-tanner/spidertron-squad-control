@@ -56,7 +56,7 @@ Date: 2020-11-28
     - Completely refactor code to be cleaner
     - Spidertron Waypoints mod compatibility
     - Added menu/gui to save and load squad configurations
-    - Spidertron link tool (Link squads to an entity)
-    - 2NOTICE: THIS VERSION IS A WORK IN PROGRESS - CHANGELOG IS NOT FINAL
+    - Added Spidertron link tool (Link squads to an entity)
+    - Added mod option to override the default tool/remote given by shortcut
     - 3NOTICE: THIS VERSION IS A WORK IN PROGRESS - CHANGELOG IS NOT FINAL
     - 4NOTICE: THIS VERSION IS A WORK IN PROGRESS - CHANGELOG IS NOT FINAL

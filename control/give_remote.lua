@@ -8,21 +8,49 @@
 
 require("control.functions")
 
-function GiveLinkTool(index)
+local function giveTwoTool(index, stack0, stack1)
     local d = global.spidercontrol_player_s[index].active
     if (#d > 0 and d[1].spider.valid) then
         local player = game.players[index]
-        if GiveStack(player, {name="squad-spidertron-link-tool",count=1}) then
+        if GiveStack(player, stack0) then
             player.cursor_stack.connected_entity = d[1].spider
         end
     else
-        GiveStack(game.players[index], {name="squad-spidertron-unlink-tool",count=1})
+        GiveStack(game.players[index], stack1)
     end
 end
 
-script.on_event("squad-spidertron-remote", function(event)
-    GiveStack(game.players[event.player_index], {name="squad-spidertron-remote-sel",count=1})
-end)
+function GiveLinkTool(index, settings)
+    local player = game.players[index]
+    local value = settings["spidertron-default-link-remote"].value
+    if value == SETTING_LINK then
+        GiveStack(player, {name = "squad-spidertron-link-tool", count = 1})
+    elseif value == SETTING_UNLINK then
+        GiveStack(player, {name = "squad-spidertron-unlink-tool", count = 1})
+    else    --  value == AUTOMATIC
+        giveTwoTool(index,
+            {name="squad-spidertron-link-tool",count=1},
+            {name="squad-spidertron-unlink-tool",count=1}
+        )
+    end
+end
+
+function GiveSquadTool(index, settings)
+    local player = game.players[index]
+    local value = settings["spidertron-default-squad-remote"].value
+    if value == SETTING_REMOTE_SEL then
+        GiveStack(player, {name = "squad-spidertron-remote-sel", count = 1})
+    elseif value == SETTING_LINK then
+        GiveStack(player, {name = "squad-spidertron-remote", count = 1})
+    else    --  value == AUTOMATIC
+        giveTwoTool(
+            index,
+            {name="squad-spidertron-remote",count=1},
+            {name="squad-spidertron-remote-sel",count=1}
+        )
+    end
+end
+
 
 script.on_event("squad-spidertron-switch-modes", function(event)
     local player = game.players[event.player_index]
@@ -40,7 +68,7 @@ script.on_event("squad-spidertron-switch-modes", function(event)
         elseif name == "squad-spidertron-link-tool" then
             GiveStack(player, {name="squad-spidertron-unlink-tool",count=1})
         elseif name == "squad-spidertron-unlink-tool" then
-            GiveLinkTool(event.player_index)
+            GiveStack(player, {name = "squad-spidertron-link-tool", count = 1})
         end
     end
 end)
@@ -53,7 +81,7 @@ end)
 --         squad_leader_state(index)
 --         spiderbot_follow(game.players[index])
 --     elseif name == "squad-spidertron-link-tool" then
---         GiveLinkTool(event.player_index)
+--         GiveStack(player, {name = "squad-spidertron-link-tool", count = 1})
 --     end
 -- end)
 

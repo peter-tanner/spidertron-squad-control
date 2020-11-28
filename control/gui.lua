@@ -138,15 +138,15 @@ function ToggleGuiList(index)
 end
 
 
-commands.add_command("ssc_gui", "Create gui", function(cmd)
-    gui(game.players[cmd.player_index])
+commands.add_command("ssc_gui", "Spidertron squad control configured squads gui toggle", function(cmd)
+    ToggleGuiList(cmd.player_index)
 end)
 
 script.on_event(defines.events.on_gui_click, function(event)
     local gui = event.element
     local index = event.player_index
     local player = game.players[index]
-    local limit = 20
+    local limit = settings.global["spidertron-max-squads"].value
     if not (player and player.valid and gui and gui.valid) then
         return
     end
