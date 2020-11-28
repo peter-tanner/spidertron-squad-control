@@ -1,4 +1,10 @@
-
+--[[ Copyright (c) 2020 npc_strider
+ * For direct use of code or graphics, credit is appreciated. See LICENSE.txt for more information.
+ * This mod may contain modified code sourced from base/core Factorio
+ * 
+ * control/2dvec.lua
+ * 2d vectors stuff. Some are specific to this mod
+--]]
 
 function IJMean(vectors)
     local sumx = 0

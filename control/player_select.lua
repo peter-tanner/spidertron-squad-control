@@ -1,3 +1,10 @@
+--[[ Copyright (c) 2020 npc_strider
+ * For direct use of code or graphics, credit is appreciated. See LICENSE.txt for more information.
+ * This mod may contain modified code sourced from base/core Factorio
+ * 
+ * control/player_select.lua
+ * Handles selection tools for link and squad select.
+--]]
 
 require("control.functions")
 require("control.2dvec")
@@ -40,7 +47,7 @@ local function unitNumbers(entities)
     return ids
 end
 
-local function spiderDeSelect(spiders, force)
+function SpiderDeSelect(spiders, force)
     local ids = unitNumbers(spiders)
     local t = global.spidercontrol_linked_s
     local rem_t = {}    --This part is really bad - I think it's O(N^3) worst case?
@@ -97,18 +104,17 @@ end
 local function spiderSelect(spiders, index)
 
     local player = game.players[index]
-    local force = player.force.index
     local mean = IJMeanEntity(spiders)
     global.spidercontrol_player_s[index].active = {}
 
-    spiderDeSelect(spiders, force) -- TO prevent double-linking (linking the same spider to 2 or more entities)
+    SpiderDeSelect(spiders, player.force.index) -- TO prevent double-linking (linking the same spider to 2 or more entities)
     if SPIDERTRON_WAYPOINTS then
         for i = 1, #spiders do
             remote.call("SpidertronWaypoints", "clear_waypoints", spiders[i].unit_number)
             spiders[i].autopilot_destination = nil
         end
     end
-    -- spiderDeSelectPlayers(spiders, force) -- Y'know what, not sure if i can be arsed to deselect player squads...
+    -- spiderDeSelectPlayers(spiders, player.force.index) -- Y'know what, not sure if i can be arsed to deselect player squads...
 
     for i=1, #spiders do
         table.insert(global.spidercontrol_player_s[index].active, {
@@ -130,8 +136,10 @@ local function areaSelection(event)
     if #spiders > 0 then
         if item == "squad-spidertron-remote-sel" then
             spiderSelect(spiders, index)
+            UpdateGuiList(game.players[index])
         elseif item == "squad-spidertron-unlink-tool" then
-            spiderDeSelect(spiders, spiders[1].force.index)
+            SpiderDeSelect(spiders, spiders[1].force.index)
+            UpdateGuiList(game.players[index])
         end
     end
 end

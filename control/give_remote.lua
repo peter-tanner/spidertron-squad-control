@@ -1,3 +1,11 @@
+--[[ Copyright (c) 2020 npc_strider
+ * For direct use of code or graphics, credit is appreciated. See LICENSE.txt for more information.
+ * This mod may contain modified code sourced from base/core Factorio
+ * 
+ * control/give_remote.lua
+ * Gives the various remotes (link tool, unlink tool, squad remote, selection tool) to the player.
+--]]
+
 require("control.functions")
 
 function GiveLinkTool(index)

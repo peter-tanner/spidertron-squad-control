@@ -71,11 +71,10 @@ local shortcut_remote = {
 	type = "shortcut",
 	name = "squad-spidertron-remote",
 	order = "a[squad-spidertron-remote]",
-	action = "spawn-item",
+	action = "lua",
 	localised_name = "Spidertron squad remote",
 	associated_control_input = "squad-spidertron-remote",
 	technology_to_unlock = "spidertron",
-	item_to_spawn = "squad-spidertron-remote-sel",
 	style = "red",
 	icon =
 	{
@@ -118,6 +117,13 @@ shortcut_link.localised_name = "Link spidertrons to entity"
 shortcut_link.associated_control_input = "squad-spidertron-link-tool"
 shortcut_link.style = "green"
 
+local shortcut_list = util.table.deepcopy(shortcut_remote)
+shortcut_list.name = "squad-spidertron-list"
+shortcut_list.action = "lua"
+shortcut_list.localised_name = "Manage saved spidertrons"
+shortcut_list.associated_control_input = "squad-spidertron-list"
+shortcut_list.style = nil
+
 ------------------------------------------------------------------------
 -- CUSTOM INPUT
 ------------------------------------------------------------------------
@@ -145,6 +151,11 @@ input_link.name = "squad-spidertron-link-tool"
 input_link.localised_name = "Link spidertron squad to entity"
 input_link.key_sequence = "ALT + Z"
 
+local input_list = util.table.deepcopy(input_remote)
+input_list.name = "squad-spidertron-list"
+input_list.localised_name = "Manage saved spidertrons"
+input_list.key_sequence = "ALT + V"
+
 ------------------------------------------------------------------------
 -- EXTEND
 ------------------------------------------------------------------------
@@ -154,6 +165,7 @@ data:extend(
 	shortcut_remote,
 	shortcut_follow,
 	shortcut_link,
+	shortcut_list,
 
 	item_remote_sel,
 	item_unlink_sel,
@@ -196,5 +208,6 @@ data:extend(
 	input_remote,
 	input_follow,
 	input_switch_modes,
-	input_link
+	input_link,
+	input_list
 })

@@ -1,3 +1,10 @@
+--[[ Copyright (c) 2020 npc_strider
+ * For direct use of code or graphics, credit is appreciated. See LICENSE.txt for more information.
+ * This mod may contain modified code sourced from base/core Factorio
+ * 
+ * control/player_follow.lua
+ * Stuff here runs periodically to move the player's active squad to their position in follow mode. Also incorporate some comaptibility with spidertron waypoints.
+--]]
 
 local function spidertronWaypointsOverride(s)
     if SPIDERTRON_WAYPOINTS then

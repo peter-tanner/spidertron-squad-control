@@ -1,3 +1,10 @@
+--[[ Copyright (c) 2020 npc_strider
+ * For direct use of code or graphics, credit is appreciated. See LICENSE.txt for more information.
+ * This mod may contain modified code sourced from base/core Factorio
+ * 
+ * control/functions.lua
+ * General/commonly used/important functions.
+--]]
 
 function SpidertronWaypointsCompatibility()
     -- Compatability for Spidertron Waypoints
@@ -42,12 +49,14 @@ end
 function Goto(spiders, center)
     local invalid = {}
     for i = 1, #spiders do
-        local spider = spiders[i].spider
-        local d = spiders[i].delta
-        if spider.valid then
-            spider.autopilot_destination = IJAdd(center, d)
-        else
-            invalid[#invalid+1] = i
+        if spiders[i] then
+            local spider = spiders[i].spider
+            local d = spiders[i].delta
+            if spider.valid then
+                spider.autopilot_destination = IJAdd(center, d)
+            else
+                invalid[#invalid+1] = i
+            end
         end
     end
     return Remove(spiders, invalid) -- We return an updated spider list (Remove any invalid spiders)
@@ -111,6 +120,7 @@ local function GotoPlayerSW(index, position)
                 end
                 resetSprites(patrol)
                 global.spidercontrol_player_s[index].active = {}
+                UpdateGuiList(player)
                 GiveStack(player, {name="squad-spidertron-remote-sel",count=1})
                 player.set_shortcut_toggled("spidertron-remote-patrol", false)
                 patrol = nil

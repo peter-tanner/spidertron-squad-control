@@ -53,10 +53,10 @@ Date: 2020-11-28
   Features:
     - NOTE: BETA RELEASE - USE AT YOUR OWN RISK!
     - Update mod to Factorio 1.1
-    - Completely refactor code
-    - Attempt at Spidertron Waypoints compatibility
-    - 0NOTICE: THIS VERSION IS A WORK IN PROGRESS - CHANGELOG IS NOT FINAL
-    - 1NOTICE: THIS VERSION IS A WORK IN PROGRESS - CHANGELOG IS NOT FINAL
+    - Completely refactor code to be cleaner
+    - Spidertron Waypoints mod compatibility
+    - Added menu/gui to save and load squad configurations
+    - Spidertron link tool (Link squads to an entity)
     - 2NOTICE: THIS VERSION IS A WORK IN PROGRESS - CHANGELOG IS NOT FINAL
     - 3NOTICE: THIS VERSION IS A WORK IN PROGRESS - CHANGELOG IS NOT FINAL
     - 4NOTICE: THIS VERSION IS A WORK IN PROGRESS - CHANGELOG IS NOT FINAL

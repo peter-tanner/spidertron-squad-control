@@ -14,7 +14,7 @@ require("control.debug")
 -- REMEMBER TO COMMENT DEBUG OUT IN RELEASE!!
 -- REMEMBER TO COMMENT DEBUG OUT IN RELEASE!!
 -- REMEMBER TO COMMENT DEBUG OUT IN RELEASE!!
-
+require("control.gui")
 require("control.init")
 require("control.remote")
 require("control.give_remote")
@@ -41,20 +41,33 @@ script.on_event("squad-spidertron-link-tool", function(event)
     GiveLinkTool(event.player_index)
 end)
 
+script.on_event("squad-spidertron-list", function(event)
+    ToggleGuiList(event.player_index)
+end)
+
 script.on_event(defines.events.on_lua_shortcut, function (event)
     local name = event.prototype_name
-    if name == "squad-spidertron-follow" then
+    if name == "squad-spidertron-remote" then
+        GiveStack(game.players[event.player_index], {name = "squad-spidertron-remote-sel", count = 1})
+    elseif name == "squad-spidertron-follow" then
         local index = event.player_index
         -- squad_leader_state(index)
         SpiderbotFollow(game.players[index])
     elseif name == "squad-spidertron-link-tool" then
         GiveLinkTool(event.player_index)
+    elseif name == "squad-spidertron-list" then
+        ToggleGuiList(event.player_index)
     end
 end)
 
 script.on_nth_tick(settings.global["spidertron-follow-update-interval"].value, function(event)
     UpdateFollow()
     UpdateFollowEntity()
+end)
+script.on_nth_tick(60, function(event)
+    for _, player in pairs(game.players) do
+        UpdateGuiList(player)
+    end
 end)
 
 

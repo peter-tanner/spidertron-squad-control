@@ -1,6 +1,14 @@
+--[[ Copyright (c) 2020 npc_strider
+ * For direct use of code or graphics, credit is appreciated. See LICENSE.txt for more information.
+ * This mod may contain modified code sourced from base/core Factorio
+ * 
+ * control/player_man_designate.lua
+ * Stuff happens here when a player calls a squad to a position.
+--]]
+
 require("control.functions")
 
-local function moveTo(player, index, position)
+local function moveTo(index, position)
     game.players[index].set_shortcut_toggled("squad-spidertron-follow", false)
     GotoPlayer(index, position)
 end
@@ -64,6 +72,7 @@ local function link(index, vehicle)
         global.spidercontrol_player_s[index].active = {} -- We're taking away player control of this squad!
         -- Probably should print the squad ID, the target entity id and other information
         GiveStack(player, {name="squad-spidertron-unlink-tool",count=1})
+        UpdateGuiList(player)
     end
     vehicle.autopilot_destination = vehicle.position    -- Just to look better
 end
@@ -77,7 +86,7 @@ script.on_event(defines.events.on_player_used_spider_remote, function(event)
         if cursor_stack.valid_for_read and event.success then
             local cname = cursor_stack.name
             if cname == "squad-spidertron-remote" then
-                moveTo(player, index, event.position)
+                moveTo(index, event.position)
             elseif cname == "spidertron-remote" then -- WARNING: We're only overriding for the player's spidertron if it's the vanilla spidertron remote. Does not cover modded remotes!
                 local vehicle = event.vehicle
                 local position = event.position
