@@ -12,28 +12,28 @@ require("control.2dvec")
 local function messageSpiders(target, s, force, n)
     if target.valid then
         local pos = target.position
-        game.forces[force].print({"", n.." spidertrons have been unlinked from a ", target.localised_name, " near [gps="..pos.x..","..pos.y.."]"})
+        game.forces[force].print({"", "[img=utility/warning_icon] "..n.." spidertrons have been unlinked from a ", target.localised_name, " near [gps="..pos.x..","..pos.y.."]"})
     else
         local e = FirstValid(s)
         if e then
             local pos = e.position
-            game.forces[force].print(n.." spidertrons have been unlinked from an entity near [gps="..pos.x..","..pos.y.."]")
+            game.forces[force].print("[img=utility/warning_icon] "..n.." spidertrons have been unlinked from an entity near [gps="..pos.x..","..pos.y.."]")
         else
-            game.forces[force].print(n.." spidertrons have been unlinked from an entity")
+            game.forces[force].print("[img=utility/warning_icon] "..n.." spidertrons have been unlinked from an entity")
         end
     end
 end
 local function messageS(target, s, force)
     if target.valid then
         local pos = target.position
-        game.forces[force].print({"", "Spidertron squad has been unlinked from ", target.localised_name, " near [gps="..pos.x..","..pos.y.."]"})    -- using force comms because this could be the death of a spidertron, not only removal
+        game.forces[force].print({"", "[img=utility/warning_icon] Spidertron squad has been unlinked from ", target.localised_name, " near [gps="..pos.x..","..pos.y.."]"})    -- using force comms because this could be the death of a spidertron, not only removal
     else
         local e = FirstValid(s)
         if e then
             local pos = e.position
-            game.forces[force].print({"", "Spidertron squad has been unlinked from a target near [gps="..pos.x..","..pos.y.."]"})
+            game.forces[force].print({"", "[img=utility/warning_icon] Spidertron squad has been unlinked from a target near [gps="..pos.x..","..pos.y.."]"})
         else
-            game.forces[force].print({"", "Spidertron squad has been unlinked from a target"})
+            game.forces[force].print({"", "[img=utility/warning_icon] Spidertron squad has been unlinked from a target"})
         end
     end
 end
@@ -62,7 +62,6 @@ function SpiderDeSelect(spiders, force)
                         s[j].spider.autopilot_destination = nil
                         rem_id[#rem_id+1] = k
                         rem_s[#rem_s+1] = j
-                        -- game.print("REMOVE["..i.."]["..j.."]")
                     end
                 end
                 if (#rem_id > 0) then

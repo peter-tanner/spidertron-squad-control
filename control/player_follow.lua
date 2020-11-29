@@ -9,7 +9,9 @@
 local function spidertronWaypointsOverride(s)
     if SPIDERTRON_WAYPOINTS then
         for i = 1, #s do
-            remote.call("SpidertronWaypoints", "clear_waypoints", s[i].spider.unit_number)
+            if (s[i] and s[i].spider) then
+                remote.call("SpidertronWaypoints", "clear_waypoints", s[i].spider.unit_number)
+            end
         end
     end
 end
@@ -22,11 +24,14 @@ function SpiderbotFollow(player)
             GotoPlayer(index, player.position)
             spidertronWaypointsOverride(global.spidercontrol_player_s[index].active)
         else
+            if SPIDERTRON_WAYPOINTS and player.is_shortcut_toggled("spidertron-remote-patrol") then
+                return
+            end
             player.set_shortcut_toggled("squad-spidertron-follow", true)
             global.spidercontrol_player_s[player.index].p_pos = nil
 		end
 	else
-		player.print({"", {"error.error-message-box-title"}, ": ", {"player-doesnt-exist", {"gui.character"}}, " (", {"controller.god"}, "): ", {"gui-mod-info.status-disabled"}})
+		player.print({"", "[img=utility/danger_icon] ", {"error.error-message-box-title"}, ": ", {"player-doesnt-exist", {"gui.character"}}, " (", {"controller.god"}, "): ", {"gui-mod-info.status-disabled"}})
 	end
 end
 
@@ -55,13 +60,12 @@ function UpdateFollow()
                         end
                     end
     
-                    -- player.print("running" .. game.tick)
                     if player.walking_state.walking then
                         local dir = player.walking_state.direction
                         pos = IJAhead(pos, dir, mov_offset)
                     end
                     GotoPlayer(index, pos)
-                    spidertronWaypointsOverride(active)
+                    spidertronWaypointsOverride(global.spidercontrol_player_s[index].active)
                     global.spidercontrol_player_s[index].p_pos = player.position
                 end
             end

@@ -51,28 +51,31 @@ end
 
 local function link(index, vehicle)
     local player = game.players[index]
-    local n = #global.spidercontrol_player_s[index].active
-    if player.selected and player.selected.valid and n > 0 then
-        local selected = player.selected
-        local pos = selected.position
-        local scale = 1.5
-        local force = player.force
-        player.print({"", "Linked ".. n .. " spiders to ", selected.localised_name, " near [gps=" .. pos.x .. "," .. pos.y .. "]"})
-        local sprite = drawSprite(selected, scale, force)
-        local s = util.table.deepcopy(global.spidercontrol_player_s[index].active)
-        for i = 1, #s do
-            s[i].sprite = drawSprite(s[i].spider, scale, force, {r=1,g=0,b=0}, {x=0,y=-0.3})
+    local selected = player.selected
+    if (selected and selected.valid) then
+        GotoPlayerUpdate(index, selected.position)
+        local n = #global.spidercontrol_player_s[index].active
+        if (n > 0) then
+            local pos = selected.position
+            local scale = 1.5
+            local force = player.force
+            local sprite = drawSprite(selected, scale, force)
+            local s = util.table.deepcopy(global.spidercontrol_player_s[index].active)
+            for i = 1, #s do
+                s[i].sprite = drawSprite(s[i].spider, scale, force, {r=1,g=0,b=0}, {x=0,y=-0.3})
+            end
+            global.spidercontrol_linked_s[#global.spidercontrol_linked_s+1] = {
+                force=player.force.index,
+                target=selected,
+                sprite=sprite,
+                s=s
+            }
+            global.spidercontrol_player_s[index].active = {} -- We're taking away player control of this squad!
+            -- Probably should print the squad ID, the target entity id and other information
+            GiveStack(player, {name="squad-spidertron-unlink-tool",count=1})
+            UpdateGuiList(player)
+            AlertPlayer(player, {"", "[img=virtual-signal/signal-info] Linked ".. n .. " spiders to ", selected.localised_name, " near [gps=" .. pos.x .. "," .. pos.y .. "]"})
         end
-        global.spidercontrol_linked_s[#global.spidercontrol_linked_s+1] = {
-            force=player.force.index,
-            target=selected,
-            sprite=sprite,
-            s=s
-        }
-        global.spidercontrol_player_s[index].active = {} -- We're taking away player control of this squad!
-        -- Probably should print the squad ID, the target entity id and other information
-        GiveStack(player, {name="squad-spidertron-unlink-tool",count=1})
-        UpdateGuiList(player)
     end
     vehicle.autopilot_destination = vehicle.position    -- Just to look better
 end

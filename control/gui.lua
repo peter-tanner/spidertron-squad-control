@@ -164,7 +164,7 @@ script.on_event(defines.events.on_gui_click, function(event)
                 UpdateGuiList(player)
                 destroyRenameGui(get_frame_flow_(player, "center"))
             else
-                player.print("You have too many saved templates! Remove some before adding more. Maximum amount is "..limit)
+                player.print("[img=utility/danger_icon] You have too many saved templates! Remove some before adding more. Maximum amount is "..limit)
             end
         end
     elseif (name == "delete-active") then

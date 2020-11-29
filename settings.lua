@@ -73,5 +73,13 @@ data:extend({
             SETTING_LINK,
             SETTING_UNLINK
         }
+    },
+    {
+        type = "bool-setting",
+        name = "spidertron-alerts",
+        localised_name = "Spidertron alerts",
+        localised_description = "If enabled an alert is given when a spidertron is removed or destroyed from a player squad. Default value: true",
+        setting_type = "runtime-per-user",
+        default_value = true
     }
 })

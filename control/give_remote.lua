@@ -10,10 +10,17 @@ require("control.functions")
 
 local function giveTwoTool(index, stack0, stack1)
     local d = global.spidercontrol_player_s[index].active
-    if (#d > 0 and d[1].spider.valid) then
+    local s
+    for i = 1, #d do
+        if (d[i].spider.valid) then
+            s = d[i].spider
+            break
+        end
+    end
+    if (s) then
         local player = game.players[index]
         if GiveStack(player, stack0) then
-            player.cursor_stack.connected_entity = d[1].spider
+            player.cursor_stack.connected_entity = s
         end
     else
         GiveStack(game.players[index], stack1)

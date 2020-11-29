@@ -6,6 +6,16 @@
  * General/commonly used/important functions.
 --]]
 
+function AlertPlayer(player, str)
+    local enabled = settings.get_player_settings(player)["spidertron-alerts"].value
+    if (enabled) then
+        player.print(str)
+        return true
+    else
+        return false
+    end
+end
+
 function SpidertronWaypointsCompatibility()
     -- Compatability for Spidertron Waypoints
     if remote.interfaces["SpidertronWaypoints"] then
@@ -22,8 +32,9 @@ end
 function GiveStack(player, stack)
     if player.clear_cursor() and player.cursor_stack and player.cursor_stack.can_set_stack(stack) then
         if player.get_main_inventory() then
-            player.get_main_inventory().remove("squad-spidertron-remote-sel")
-            player.get_main_inventory().remove("squad-spidertron-remote")
+            local inv = player.get_main_inventory()
+            inv.remove("squad-spidertron-remote-sel")
+            inv.remove("squad-spidertron-remote")
         end
         player.cursor_stack.set_stack(stack)
         return true
@@ -83,15 +94,15 @@ local function resetSprites(indices)
     end
 end
 -- Original GotoPlayer function before waypoints compat.
-local function GotoPlayer_(index, position)
+function GotoPlayerUpdate(index, position)
     local active = global.spidercontrol_player_s[index].active
     local active_n = #active
     local active_updated = Goto(active, position)
     global.spidercontrol_player_s[index].active = active_updated
-    
+
     if (active_n > #active_updated) then
-        local str = (active_n - #active_updated) .. " units were destroyed or mined"
-        game.players[index].print(str)
+        local str = "[img=utility/warning_icon] " .. (active_n - #active_updated) .. " units were destroyed or mined"
+        AlertPlayer(game.players[index], str)
     end
 end
 
@@ -101,22 +112,27 @@ local function GotoPlayerSW(index, position)
     local linear = player.is_shortcut_toggled("spidertron-remote-waypoint")
     local cyclic = player.is_shortcut_toggled("spidertron-remote-patrol")
     if (cyclic) then
+        if player.is_shortcut_toggled("squad-spidertron-follow") then
+            return
+        end
         active[1].spider.autopilot_destination = nil
         local patrol = global.spidercontrol_spidertronwaypoints_patrol[index]
         if (patrol) then
             local start = rendering.get_target(patrol[1]).position
             if (util.distance(position, start) < 5) then
                 for j = 1, #active do
-                    local waypoints = {}
-                    for i = 1, #patrol do
-                        local position = IJAdd(
-                            rendering.get_target(patrol[i]).position,
-                            active[j].delta
-                        )
-                        waypoints[#waypoints+1] = {position = position}
+                    if (active[j] and active[j].spider.valid) then
+                        local waypoints = {}
+                        for i = 1, #patrol do
+                            local position = IJAdd(
+                                rendering.get_target(patrol[i]).position,
+                                active[j].delta
+                            )
+                            waypoints[#waypoints+1] = {position = position}
+                        end
+                        
+                        remote.call("SpidertronWaypoints", "assign_patrol", active[j].spider, waypoints)
                     end
-                    
-                    remote.call("SpidertronWaypoints", "assign_patrol", active[j].spider, waypoints)
                 end
                 resetSprites(patrol)
                 global.spidercontrol_player_s[index].active = {}
@@ -142,7 +158,7 @@ local function GotoPlayerSW(index, position)
         resetSprites(global.spidercontrol_spidertronwaypoints_patrol[index])
         global.spidercontrol_spidertronwaypoints_patrol[index] = nil
     else
-        GotoPlayer_(index, position)
+        GotoPlayerUpdate(index, position)
         
         resetSprites(global.spidercontrol_spidertronwaypoints_patrol[index])
         global.spidercontrol_spidertronwaypoints_patrol[index] = nil
@@ -153,9 +169,8 @@ function GotoPlayer(index, position)
     if SPIDERTRON_WAYPOINTS then
         GotoPlayerSW(index, position)
     else
-        GotoPlayer_(index, position)
+        GotoPlayerUpdate(index, position)
     end
-
 end
 
 function GotoEntity(index)
@@ -171,12 +186,12 @@ function GotoEntity(index)
         global.spidercontrol_linked_s[index].s = active_updated
         
         if (active_n > #active_updated) then
-            local str = (active_n - #active_updated) .. " units were destroyed or mined near [gps="..pos.x..","..pos.y.."], linked to "..entity.localised_name
+            local str = {"", "[img=utility/warning_icon] " .. (active_n - #active_updated) .. " units were destroyed or mined near [gps="..pos.x..","..pos.y.."], linked to ", entity.localised_name}
             game.forces[t.force].print(str)
         end
 
         if (#active_updated == 0) then
-            local str = {"", "Spidertron squad has been destroyed or unlinked from ", entity.localised_name, " near [gps="..pos.x..","..pos.y.."]"}
+            local str = {"", "[img=utility/warning_icon] Spidertron squad has been destroyed or unlinked from ", entity.localised_name, " near [gps="..pos.x..","..pos.y.."]"}
             game.forces[t.force].print(str)    -- using force comms because this could be the death of a spidertron, not only removal
         end
     else
@@ -188,9 +203,9 @@ function GotoEntity(index)
         end
         if (e) then
             local pos = e.position
-            game.forces[t.force].print("Target entity of spidertron squad has been destroyed or removed near [gps="..pos.x..","..pos.y.."]")
+            game.forces[t.force].print("[img=utility/warning_icon] Target entity of spidertron squad has been destroyed or removed near [gps="..pos.x..","..pos.y.."]")
         else
-            game.forces[t.force].print("Target entity of spidertron squad has been destroyed or removed")
+            game.forces[t.force].print("[img=utility/warning_icon] Target entity of spidertron squad has been destroyed or removed")
         end
 
         global.spidercontrol_linked_s = Remove(global.spidercontrol_linked_s, {index})
