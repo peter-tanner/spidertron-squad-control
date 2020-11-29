@@ -58,9 +58,9 @@ script.on_event(defines.events.on_lua_shortcut, function(event)
     local settings = settings.get_player_settings(game.players[index])
     local name = event.prototype_name
     if name == "squad-spidertron-remote" then
-        GiveLinkTool(index, settings)
-    elseif name == "squad-spidertron-link-tool" then
         GiveSquadTool(index, settings)
+    elseif name == "squad-spidertron-link-tool" then
+        GiveLinkTool(index, settings)
     elseif name == "squad-spidertron-follow" then
         -- squad_leader_state(index)
         SpiderbotFollow(game.players[index])

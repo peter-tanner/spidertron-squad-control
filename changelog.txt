@@ -60,3 +60,11 @@ Date: 2020-11-28
     - Added mod option to override the default tool/remote given by shortcut
     - Added mod option to disable player alerts
     - _NOTE: BETA RELEASE - USE AT YOUR OWN RISK!
+
+---------------------------------------------------------------------------------------------------
+Version: 0.5.1
+Date: 2020-11-29
+  Features:
+    - NOTE: BETA RELEASE - USE AT YOUR OWN RISK!
+  Bugfixes:
+    - Fixed switched shortcuts
