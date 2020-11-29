@@ -42,7 +42,9 @@ end
 local function unitNumbers(entities)
     local ids = {}
     for i = 1, #entities do
-        ids[#ids+1] = entities[i].unit_number
+        if entities[i].valid then
+            ids[#ids+1] = entities[i].unit_number
+        end
     end
     return ids
 end
