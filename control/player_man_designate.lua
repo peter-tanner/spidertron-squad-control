@@ -16,20 +16,22 @@ end
 local function realign(s, vehicle, position, target)
     local unit_number = vehicle.unit_number
     for i = 1, #s do
-        if (s[i].spider.unit_number == unit_number) then
-            -- This commented-out targeting works relative to the mean of the group, not the target entity. It has its benefits but ultimately I preferred the target-based modification, so i've left this uncommented.
-            -- if (s[i+1]) then -- Use another spidertron as a reference vector/position
-            --     local origin = IJSub(s[i+1].spider.position, s[i+1].delta)
-            --     s[i].delta = IJSub(position, origin)
-            -- elseif (s[i-1]) then
-            --     local origin = IJSub(s[i-1].spider.position, s[i-1].delta)
-            --     s[i].delta = IJSub(position, origin)
-            -- else
-            --     -- spider list should never be a sparse list, so if nothing's adjacent it's a single spidertron
-            --     s[i].delta = IJSub(position, vehicle.position) -- Not really good without a ref vector
-            -- end
-            s[i].delta = IJSub(position, target.position)
-            return s
+        if (s) then
+            if (s[i].spider.unit_number == unit_number) then
+                -- This commented-out targeting works relative to the mean of the group, not the target entity. It has its benefits but ultimately I preferred the target-based modification, so i've left this uncommented.
+                -- if (s[i+1]) then -- Use another spidertron as a reference vector/position
+                --     local origin = IJSub(s[i+1].spider.position, s[i+1].delta)
+                --     s[i].delta = IJSub(position, origin)
+                -- elseif (s[i-1]) then
+                --     local origin = IJSub(s[i-1].spider.position, s[i-1].delta)
+                --     s[i].delta = IJSub(position, origin)
+                -- else
+                --     -- spider list should never be a sparse list, so if nothing's adjacent it's a single spidertron
+                --     s[i].delta = IJSub(position, vehicle.position) -- Not really good without a ref vector
+                -- end
+                s[i].delta = IJSub(position, target.position)
+                return s
+            end
         end
     end
     return false
